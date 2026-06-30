@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  quality:
+    name: Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: store_rating
+          POSTGRES_PASSWORD: store_rating_secret
+          POSTGRES_DB: store_rating_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U store_rating -d store_rating_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://store_rating:store_rating_secret@localhost:5432/store_rating_db?schema=public
+      SERVER_PORT: 3001
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-access-secret-minimum-32-characters
+      JWT_REFRESH_SECRET: ci-refresh-secret-minimum-32-characters
+      CLIENT_ORIGIN: http://localhost:5173
+      VITE_API_BASE_URL: http://localhost:3001/api/v1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate -w server
+
+      - name: Run database migrations
+        run: npm run db:migrate:deploy -w server
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build

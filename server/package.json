@@ -1,0 +1,33 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Express API for the Store Rating Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.9.0",
+    "@store-rating/shared": "*",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.29",
+    "prisma": "^6.9.0",
+    "tsx": "^4.19.4",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.3"
+  }
+}

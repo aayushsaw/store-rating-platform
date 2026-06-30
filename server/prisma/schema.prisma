@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SYSTEM_ADMIN
+  NORMAL_USER
+  STORE_OWNER
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  name         String    @db.VarChar(60)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash")
+  address      String    @db.VarChar(400)
+  role         Role      @default(NORMAL_USER)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  ownedStore    Store?
+  ratings       Rating[]
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([role])
+  @@index([name])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Store {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  address   String   @db.VarChar(400)
+  ownerId   String   @unique @map("owner_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner   User     @relation(fields: [ownerId], references: [id])
+  ratings Rating[]
+
+  @@index([name])
+  @@index([address])
+  @@map("stores")
+}
+
+model Rating {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  storeId   String   @map("store_id") @db.Uuid
+  value     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+
+  @@unique([userId, storeId])
+  @@index([storeId])
+  @@index([userId])
+  @@map("ratings")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
