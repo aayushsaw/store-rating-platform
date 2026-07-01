@@ -12,6 +12,7 @@ import { env } from '@/config/env.js';
 import { errorHandler } from '@/middleware/errorHandler.js';
 import { healthRouter } from '@/routes/health.routes.js';
 import { authRouter } from '@/routes/auth.routes.js';
+import { adminRouter } from '@/routes/admin.routes.js';
 import { logger } from '@/lib/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,6 +70,7 @@ export function createApp() {
   // ── Routes ──────────────────────────────────────────────────────────────────
   app.use('/api/v1', healthRouter);
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/admin', adminRouter);
 
   // ── Global error handler (must be last) ─────────────────────────────────────
   app.use(errorHandler);

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import {
   register,
@@ -14,37 +14,48 @@ import { registerSchema, loginSchema, changePasswordSchema } from '@store-rating
 
 // ─── Rate limiters ────────────────────────────────────────────────────────────
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,
-  message: { message: 'Too many login attempts. Please try again in 15 minutes.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const isTest = process.env.NODE_ENV === 'test';
+const skipLimiter = (_req: Request, _res: Response, next: NextFunction) => next();
 
-const registerLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,
-  message: { message: 'Too many registration attempts. Please try again in 15 minutes.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const loginLimiter = isTest
+  ? skipLimiter
+  : rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 10,
+      message: { message: 'Too many login attempts. Please try again in 15 minutes.' },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
 
-const changePasswordLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5,
-  message: { message: 'Too many password change attempts. Please try again in an hour.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const registerLimiter = isTest
+  ? skipLimiter
+  : rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 5,
+      message: { message: 'Too many registration attempts. Please try again in 15 minutes.' },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
 
-const refreshLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 60,
-  message: { message: 'Too many token refresh attempts. Please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const changePasswordLimiter = isTest
+  ? skipLimiter
+  : rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 5,
+      message: { message: 'Too many password change attempts. Please try again in an hour.' },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
+
+const refreshLimiter = isTest
+  ? skipLimiter
+  : rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 60,
+      message: { message: 'Too many token refresh attempts. Please try again later.' },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 

@@ -22,7 +22,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logoutThunk } from '@/features/auth/authSlice';
 import { api } from '@/lib/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 
 const roleConfig: Record<UserRole, { label: string; color: string; bg: string }> = {
   SYSTEM_ADMIN: {
@@ -200,6 +200,10 @@ export function DashboardPlaceholder() {
   const { user } = useAppSelector((s) => s.auth);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  if (user?.role === 'SYSTEM_ADMIN') {
+    return <Navigate to="/admin" replace />;
+  }
 
   const role = user?.role ?? 'NORMAL_USER';
   const roleDisplay = roleConfig[role as UserRole];

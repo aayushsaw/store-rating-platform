@@ -22,7 +22,12 @@ export function validate(schema: ZodSchema, target: Target = 'body') {
       return;
     }
     // Replace with parsed / coerced value
-    req[target] = result.data as (typeof req)[typeof target];
+    Object.defineProperty(req, target, {
+      value: result.data,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
     next();
   };
 }

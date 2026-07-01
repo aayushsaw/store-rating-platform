@@ -6,6 +6,11 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
 import { DashboardPlaceholder } from '@/pages/DashboardPlaceholder';
+import { AdminLayout } from '@/components/AdminLayout';
+import { AdminDashboard } from '@/pages/admin/Dashboard';
+import { UserManagement } from '@/pages/admin/UserManagement';
+import { StoreManagement } from '@/pages/admin/StoreManagement';
+import { UserRole } from '@store-rating/shared';
 
 function AppRoutes() {
   const dispatch = useAppDispatch();
@@ -24,6 +29,15 @@ function AppRoutes() {
       {/* ── Protected routes ── */}
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<DashboardPlaceholder />} />
+      </Route>
+
+      {/* ── Admin routes ── */}
+      <Route element={<ProtectedRoute allowedRoles={[UserRole.SYSTEM_ADMIN]} />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/stores" element={<StoreManagement />} />
+        </Route>
       </Route>
 
       {/* ── Unauthorized ── */}

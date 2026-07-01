@@ -368,3 +368,310 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Retrieve admin dashboard metrics and activity
+      operationId: getDashboardStats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dashboard stats and activity lists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics:
+                    type: object
+                    properties:
+                      totalUsers:
+                        type: integer
+                      activeUsers:
+                        type: integer
+                      totalStores:
+                        type: integer
+                      totalRatings:
+                        type: integer
+                      averageRating:
+                        type: number
+                        format: float
+                  activity:
+                    type: object
+                    properties:
+                      recentUsers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserProfile'
+                      recentStores:
+                        type: array
+                        items:
+                          type: object
+                      recentRatings:
+                        type: array
+                        items:
+                          type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin role required
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List, filter, search, and sort users
+      operationId: listUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [SYSTEM_ADMIN, NORMAL_USER, STORE_OWNER]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, deleted, all]
+            default: active
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, email, address, role, createdAt]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Paginated users list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProfile'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+                      totalPages:
+                        type: integer
+    post:
+      tags: [Admin]
+      summary: Create a user account (Admin/Normal User)
+      operationId: adminCreateUser
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, address, password, role]
+              properties:
+                name:
+                  type: string
+                  minLength: 20
+                  maxLength: 60
+                email:
+                  type: string
+                  format: email
+                address:
+                  type: string
+                  maxLength: 400
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 16
+                role:
+                  type: string
+                  enum: [SYSTEM_ADMIN, NORMAL_USER]
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Validation error
+        '409':
+          description: Email already registered
+
+  /admin/users/{id}:
+    get:
+      tags: [Admin]
+      summary: Get user details (including store avg rating if Store Owner)
+      operationId: adminGetUserDetail
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed user profile
+        '404':
+          description: User not found
+    delete:
+      tags: [Admin]
+      summary: Soft delete a user account
+      operationId: adminDeleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User soft-deleted
+        '400':
+          description: Self-deletion or last-admin deletion forbidden
+        '404':
+          description: User not found
+
+  /admin/users/{id}/reactivate:
+    patch:
+      tags: [Admin]
+      summary: Reactivate a soft-deleted user account
+      operationId: adminReactivateUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User reactivated
+        '400':
+          description: User is already active
+        '404':
+          description: User not found
+
+  /admin/stores:
+    get:
+      tags: [Admin]
+      summary: List, search, and sort stores
+      operationId: listStores
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, email, address, overallRating, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Paginated stores list
+    post:
+      tags: [Admin]
+      summary: Create a store and store owner together (Transactional)
+      operationId: createStoreWithOwner
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [store, owner]
+              properties:
+                store:
+                  type: object
+                  required: [name, email, address]
+                  properties:
+                    name:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+                    address:
+                      type: string
+                owner:
+                  type: object
+                  required: [name, email, address, password]
+                  properties:
+                    name:
+                      type: string
+                      minLength: 20
+                      maxLength: 60
+                    email:
+                      type: string
+                      format: email
+                    address:
+                      type: string
+                    password:
+                      type: string
+                      minLength: 8
+                      maxLength: 16
+      responses:
+        '201':
+          description: Store and Owner created successfully
+        '409':
+          description: Owner email or store email already exists
