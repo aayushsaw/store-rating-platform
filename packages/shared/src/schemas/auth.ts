@@ -5,7 +5,7 @@ import { z } from 'zod';
 /** Min 12, Max 60 chars */
 export const nameSchema = z
   .string({ required_error: 'Name is required' })
-  .min(12, 'Name must be at least 12 characters')
+  .min(8, 'Name must be at least 8 characters')
   .max(60, 'Name must be at most 60 characters');
 
 /** Max 400 chars */
