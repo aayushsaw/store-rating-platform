@@ -17,6 +17,7 @@ export default tseslint.config(
       'packages/shared/dist/**',
       'client/vite.config.ts',
       'server/vitest.config.ts',
+      'server/prisma/seed.ts',
     ],
   },
   eslint.configs.recommended,

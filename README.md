@@ -186,7 +186,15 @@ npm run db:generate
 npm run db:migrate
 ```
 
-### 5. Launch Development Workspaces
+### 5. Seed Demo Data
+
+Populate the database with realistic demo accounts, stores, and ratings:
+
+```bash
+npm run db:seed
+```
+
+### 6. Launch Development Workspaces
 
 Start both development servers concurrently:
 
