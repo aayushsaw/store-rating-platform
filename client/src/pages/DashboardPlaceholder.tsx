@@ -9,38 +9,16 @@ import {
   KeyRound,
   Loader2,
   LogOut,
-  Shield,
   Star,
-  User2,
   X,
 } from 'lucide-react';
-import {
-  changePasswordSchema,
-  type ChangePasswordInput,
-  type UserRole,
-} from '@store-rating/shared';
+import { changePasswordSchema, type ChangePasswordInput } from '@store-rating/shared';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { logoutThunk } from '@/features/auth/authSlice';
 import { api } from '@/lib/api';
 import { useNavigate, Navigate } from 'react-router-dom';
-
-const roleConfig: Record<UserRole, { label: string; color: string; bg: string }> = {
-  SYSTEM_ADMIN: {
-    label: 'System Administrator',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10 border-amber-500/20',
-  },
-  NORMAL_USER: {
-    label: 'Customer',
-    color: 'text-indigo-400',
-    bg: 'bg-indigo-500/10 border-indigo-500/20',
-  },
-  STORE_OWNER: {
-    label: 'Store Owner',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10 border-emerald-500/20',
-  },
-};
+import { StoreDiscovery } from './customer/StoreDiscovery';
+import { OwnerDashboard } from './owner/OwnerDashboard';
 
 interface ChangePasswordFormProps {
   onClose: () => void;
@@ -206,20 +184,12 @@ export function DashboardPlaceholder() {
   }
 
   const role = user?.role ?? 'NORMAL_USER';
-  const roleDisplay = roleConfig[role as UserRole];
 
   const handleLogout = async () => {
     setLoggingOut(true);
     await dispatch(logoutThunk());
     navigate('/login', { replace: true });
   };
-
-  const initials = user?.name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -259,75 +229,9 @@ export function DashboardPlaceholder() {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <div className="space-y-10">
-          {/* User card */}
-          <div className="card flex items-start gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-600/20 text-lg font-bold text-indigo-300">
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <h1 className="truncate text-xl font-semibold text-zinc-100">{user?.name}</h1>
-              <p className="text-sm text-zinc-500">{user?.email}</p>
-              <div
-                className={`mt-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${roleDisplay.bg} ${roleDisplay.color}`}
-              >
-                <Shield className="h-3 w-3" />
-                {roleDisplay.label}
-              </div>
-            </div>
-          </div>
-
-          {/* Milestone placeholder */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: <Star className="h-5 w-5 text-amber-400" />,
-                title: 'Ratings',
-                description: 'Browse and rate stores in your area.',
-                badge: 'M3',
-                bg: 'bg-amber-500/5 border-amber-500/10',
-              },
-              {
-                icon: <User2 className="h-5 w-5 text-indigo-400" />,
-                title: 'Profile',
-                description: 'Manage your personal information.',
-                badge: 'M3',
-                bg: 'bg-indigo-500/5 border-indigo-500/10',
-              },
-              {
-                icon: <Shield className="h-5 w-5 text-violet-400" />,
-                title: 'Admin Panel',
-                description: 'Manage users, stores, and platform data.',
-                badge: 'M2',
-                bg: 'bg-violet-500/5 border-violet-500/10',
-              },
-            ].map(({ icon, title, description, badge, bg }) => (
-              <div key={title} className={`card relative overflow-hidden border ${bg} opacity-60`}>
-                <div className="absolute right-4 top-4 rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-500">
-                  {badge}
-                </div>
-                <div className="mb-3">{icon}</div>
-                <h3 className="text-sm font-semibold text-zinc-200">{title}</h3>
-                <p className="mt-1 text-xs text-zinc-600">{description}</p>
-                <p className="mt-3 text-[11px] text-zinc-700 italic">Coming in next milestone</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Auth status */}
-          <div className="card border-indigo-500/10 bg-indigo-500/5">
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <p className="text-sm text-zinc-400">
-                Session authenticated · Access token in memory · Refresh token in{' '}
-                <span className="text-zinc-300">httpOnly cookie</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
+      {/* Main content switched dynamically by user role */}
+      {role === 'NORMAL_USER' && <StoreDiscovery />}
+      {role === 'STORE_OWNER' && <OwnerDashboard />}
 
       {/* Change Password Modal */}
       {showChangePassword && <ChangePasswordModal onClose={() => setShowChangePassword(false)} />}

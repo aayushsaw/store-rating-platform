@@ -675,3 +675,138 @@ paths:
           description: Store and Owner created successfully
         '409':
           description: Owner email or store email already exists
+
+  /stores:
+    get:
+      tags: [Stores]
+      summary: List, search, and sort stores (Discovery Feed)
+      operationId: listStoresDiscovery
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, email, address, overallRating, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Paginated discovery list of stores
+        '401':
+          description: Unauthorized
+
+  /stores/{id}:
+    get:
+      tags: [Stores]
+      summary: View store details, rating aggregates, and customer reviews feed
+      operationId: getStoreDetailPublic
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Detailed store metrics and paginated feedback list
+        '404':
+          description: Store not found
+
+  /stores/{id}/rating:
+    post:
+      tags: [Stores]
+      summary: Submit or modify rating and comment for a store (Customers Only)
+      operationId: submitStoreRating
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+                  maxLength: 1000
+      responses:
+        '200':
+          description: Rating submitted/updated successfully
+        '400':
+          description: Validation error
+        '403':
+          description: Forbidden (Only customers can rate)
+        '404':
+          description: Store not found
+
+  /owner/dashboard:
+    get:
+      tags: [Owner]
+      summary: Get store owner dashboard metrics and review logs
+      operationId: getOwnerDashboardData
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Store details, metrics progress breakdown, and paginated review feed
+        '403':
+          description: Forbidden (Owner role required)
+        '404':
+          description: Owner store not found

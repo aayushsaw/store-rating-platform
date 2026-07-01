@@ -6,3 +6,4 @@ export * from './types/auth.js';
 export * from './schemas/auth.js';
 export * from './schemas/user.js';
 export * from './schemas/store.js';
+export * from './schemas/rating.js';
