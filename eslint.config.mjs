@@ -16,6 +16,7 @@ export default tseslint.config(
       'server/dist/**',
       'packages/shared/dist/**',
       'client/vite.config.ts',
+      'server/vitest.config.ts',
     ],
   },
   eslint.configs.recommended,

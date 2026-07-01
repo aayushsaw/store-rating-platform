@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ─── Primitive validators ────────────────────────────────────────────────────
 
-/** Min 12, Max 60 chars */
+/** Min 8, Max 60 chars */
 export const nameSchema = z
   .string({ required_error: 'Name is required' })
   .min(8, 'Name must be at least 8 characters')
