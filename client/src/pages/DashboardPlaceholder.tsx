@@ -51,31 +51,31 @@ function ChangePasswordModal({ onClose }: ChangePasswordFormProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="change-password-title"
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
-        <div className="mb-5 flex items-start justify-between">
+      <div className="relative w-full max-w-sm rounded-2xl border border-[#1f1f23] bg-[#0c0c0e] p-6 shadow-2xl space-y-5 animate-scale-in">
+        <div className="flex items-start justify-between">
           <div>
-            <h2 id="change-password-title" className="text-base font-semibold text-zinc-100">
+            <h2 id="change-password-title" className="text-sm font-bold text-zinc-200">
               Change password
             </h2>
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="mt-1 text-[11px] text-zinc-550 leading-relaxed">
               All active sessions will be signed out after a successful change.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="ml-4 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+            className="rounded-lg p-1.5 text-zinc-500 hover:bg-[#18181b] hover:text-zinc-300 transition-colors"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -85,7 +85,7 @@ function ChangePasswordModal({ onClose }: ChangePasswordFormProps) {
         {success ? (
           <div className="alert-success">
             <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-            <span>Password updated. Please sign in again on other devices.</span>
+            <span>Password updated successfully. Please sign in again.</span>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -107,7 +107,7 @@ function ChangePasswordModal({ onClose }: ChangePasswordFormProps) {
                   type={showCurrent ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className={`input pr-11 ${errors.currentPassword ? 'input-error' : ''}`}
+                  className={`input text-xs pr-10 ${errors.currentPassword ? 'input-error' : ''}`}
                   {...register('currentPassword')}
                 />
                 <button
@@ -135,7 +135,7 @@ function ChangePasswordModal({ onClose }: ChangePasswordFormProps) {
                   type={showNew ? 'text' : 'password'}
                   autoComplete="new-password"
                   placeholder="••••••••"
-                  className={`input pr-11 ${errors.newPassword ? 'input-error' : ''}`}
+                  className={`input text-xs pr-10 ${errors.newPassword ? 'input-error' : ''}`}
                   {...register('newPassword')}
                 />
                 <button
@@ -154,12 +154,12 @@ function ChangePasswordModal({ onClose }: ChangePasswordFormProps) {
               id="change-password-submit"
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary"
+              className="btn-primary w-full py-2.5 text-xs"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating…
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Updating password…
                 </>
               ) : (
                 'Update password'
@@ -192,36 +192,38 @@ export function DashboardPlaceholder() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-200">
       {/* Topbar */}
-      <header className="border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-[#1f1f23] bg-[#0c0c0e]/85 backdrop-blur-md sticky top-0 z-40 shrink-0">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-              <Star className="h-4 w-4 text-white fill-white" />
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-650 shadow-md shadow-indigo-650/20">
+              <Star className="h-3.5 w-3.5 text-white fill-white" />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-zinc-100">RateStore</span>
+            <span className="text-xs font-bold tracking-tight text-zinc-100 uppercase">
+              RateStore
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               id="open-change-password"
               onClick={() => setShowChangePassword(true)}
-              className="btn-ghost"
+              className="btn-ghost text-xs"
             >
-              <KeyRound className="h-4 w-4" />
+              <KeyRound className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Change password</span>
             </button>
             <button
               id="logout-button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="btn-danger"
+              className="btn-danger text-xs hover:bg-red-500/5"
             >
               {loggingOut ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               )}
               <span className="hidden sm:inline">Sign out</span>
             </button>
@@ -230,8 +232,10 @@ export function DashboardPlaceholder() {
       </header>
 
       {/* Main content switched dynamically by user role */}
-      {role === 'NORMAL_USER' && <StoreDiscovery />}
-      {role === 'STORE_OWNER' && <OwnerDashboard />}
+      <main className="flex-1 overflow-hidden">
+        {role === 'NORMAL_USER' && <StoreDiscovery />}
+        {role === 'STORE_OWNER' && <OwnerDashboard />}
+      </main>
 
       {/* Change Password Modal */}
       {showChangePassword && <ChangePasswordModal onClose={() => setShowChangePassword(false)} />}
