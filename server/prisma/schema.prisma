@@ -7,26 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  SYSTEM_ADMIN
-  NORMAL_USER
-  STORE_OWNER
-}
-
 model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  name         String    @db.VarChar(60)
-  email        String    @unique @db.VarChar(255)
-  passwordHash String    @map("password_hash")
-  address      String    @db.VarChar(400)
-  role         Role      @default(NORMAL_USER)
-  deletedAt    DateTime? @map("deleted_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  ownedStore    Store?
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String         @db.VarChar(60)
+  email         String         @unique @db.VarChar(255)
+  passwordHash  String         @map("password_hash")
+  address       String         @db.VarChar(400)
+  role          Role           @default(NORMAL_USER)
+  deletedAt     DateTime?      @map("deleted_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
   ratings       Rating[]
   refreshTokens RefreshToken[]
+  ownedStore    Store?
 
   @@index([email])
   @@index([role])
@@ -43,9 +36,8 @@ model Store {
   ownerId   String   @unique @map("owner_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
-  owner   User     @relation(fields: [ownerId], references: [id])
-  ratings Rating[]
+  ratings   Rating[]
+  owner     User     @relation(fields: [ownerId], references: [id])
 
   @@index([name])
   @@index([address])
@@ -57,12 +49,11 @@ model Rating {
   userId    String   @map("user_id") @db.Uuid
   storeId   String   @map("store_id") @db.Uuid
   value     Int
-  comment   String?  @map("comment") @db.VarChar(1000)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
-  user  User  @relation(fields: [userId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
+  comment   String?  @map("comment") @db.VarChar(1000)
+  store     Store    @relation(fields: [storeId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, storeId])
   @@index([storeId])
@@ -71,20 +62,24 @@ model Rating {
 }
 
 model RefreshToken {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  tokenHash   String    @map("token_hash")
-  expiresAt   DateTime  @map("expires_at")
-  revokedAt   DateTime? @map("revoked_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  // Session metadata
-  userAgent   String?   @map("user_agent") @db.VarChar(500)
-  ipAddress   String?   @map("ip_address") @db.VarChar(45)
-  lastUsedAt  DateTime? @map("last_used_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @map("token_hash")
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  ipAddress  String?   @map("ip_address") @db.VarChar(45)
+  lastUsedAt DateTime? @map("last_used_at")
+  userAgent  String?   @map("user_agent") @db.VarChar(500)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tokenHash])
   @@map("refresh_tokens")
+}
+
+enum Role {
+  SYSTEM_ADMIN
+  NORMAL_USER
+  STORE_OWNER
 }
