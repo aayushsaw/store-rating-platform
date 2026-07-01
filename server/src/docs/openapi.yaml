@@ -1,0 +1,370 @@
+openapi: '3.1.0'
+
+info:
+  title: Store Rating Platform API
+  version: '1.0.0'
+  description: |
+    REST API for the Store Rating Platform.
+
+    ## Authentication
+    Most protected endpoints require a valid **JWT access token** passed as a
+    `Bearer` token in the `Authorization` header. Short-lived access tokens
+    (15 min) are paired with long-lived refresh tokens (7 days) stored in an
+    `httpOnly` cookie on the `/api/v1/auth/refresh` path.
+
+servers:
+  - url: /api/v1
+    description: Current server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token. Obtain via `POST /auth/login`.
+
+  schemas:
+    AuthUser:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [SYSTEM_ADMIN, NORMAL_USER, STORE_OWNER]
+
+    AuthResponse:
+      type: object
+      required: [accessToken, user]
+      properties:
+        accessToken:
+          type: string
+          description: Short-lived JWT (15 min)
+        user:
+          $ref: '#/components/schemas/AuthUser'
+
+    UserProfile:
+      type: object
+      required: [id, name, email, address, role, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+        role:
+          type: string
+          enum: [SYSTEM_ADMIN, NORMAL_USER, STORE_OWNER]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ValidationError:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Validation failed
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            name: ['Name must be at least 20 characters']
+            password: ['Password must contain at least one uppercase letter']
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: API health check
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user account
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, address, password]
+              properties:
+                name:
+                  type: string
+                  minLength: 20
+                  maxLength: 60
+                  example: Alexander Montgomery Smith
+                email:
+                  type: string
+                  format: email
+                  example: alex@example.com
+                address:
+                  type: string
+                  maxLength: 400
+                  example: 123 Main Street, Springfield, IL 62701
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 16
+                  description: Must contain at least one uppercase letter and one special character
+                  example: Secure@123
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (5 per 15 min)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and obtain tokens
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: alex@example.com
+                password:
+                  type: string
+                  example: Secure@123
+      responses:
+        '200':
+          description: Login successful. Refresh token set in httpOnly cookie.
+          headers:
+            Set-Cookie:
+              description: httpOnly refresh token cookie scoped to /api/v1/auth/refresh
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (10 per 15 min)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout – revoke refresh token
+      operationId: logout
+      security: []
+      description: |
+        Clears the refresh token cookie and revokes the token in the database.
+        Passing the access token is optional (included for UI convenience).
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token and issue new access token
+      operationId: refreshToken
+      security: []
+      description: |
+        Reads the httpOnly `refresh_token` cookie, validates it, revokes the
+        old token (rotation), and issues a fresh access token + new refresh
+        token cookie.
+
+        **Reuse detection**: If a revoked token is presented, all active
+        sessions for that user are immediately terminated.
+      responses:
+        '200':
+          description: New tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid, expired, or missing refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (60 per hour)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      operationId: getMe
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found or deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password:
+    patch:
+      tags: [Auth]
+      summary: Change authenticated user's password
+      operationId: changePassword
+      security:
+        - BearerAuth: []
+      description: |
+        Changes the authenticated user's password. On success, all active
+        refresh tokens for this user are revoked (forces re-login on all
+        devices).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  example: Secure@123
+                newPassword:
+                  type: string
+                  minLength: 8
+                  maxLength: 16
+                  description: Must differ from current; must have uppercase + special char
+                  example: NewPass@456
+      responses:
+        '200':
+          description: Password updated, all sessions revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Current password incorrect or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Missing or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (5 per hour)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

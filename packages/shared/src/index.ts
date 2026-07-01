@@ -3,3 +3,4 @@ export * from './types/user.js';
 export * from './types/store.js';
 export * from './types/rating.js';
 export * from './types/auth.js';
+export * from './schemas/auth.js';
