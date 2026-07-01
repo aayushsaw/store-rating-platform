@@ -20,7 +20,7 @@ const REFRESH_COOKIE_NAME = 'refresh_token';
 function setRefreshCookie(res: Response, token: string): void {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: env.isDevelopment ? 'lax' : 'none',
     secure: !env.isDevelopment,
     path: '/api/v1/auth/refresh',
     maxAge: refreshTokenMaxAgeMs(),
@@ -30,7 +30,7 @@ function setRefreshCookie(res: Response, token: string): void {
 function clearRefreshCookie(res: Response): void {
   res.clearCookie(REFRESH_COOKIE_NAME, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: env.isDevelopment ? 'lax' : 'none',
     secure: !env.isDevelopment,
     path: '/api/v1/auth/refresh',
   });

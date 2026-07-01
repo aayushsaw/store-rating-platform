@@ -22,6 +22,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export function createApp() {
   const app = express();
 
+  // Enable trust proxy for Render reverse proxy setup
+  app.set('trust proxy', 1);
+
   // ── Security headers ────────────────────────────────────────────────────────
   app.use(
     helmet({
