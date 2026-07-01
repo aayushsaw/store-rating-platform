@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 // ─── Primitive validators ────────────────────────────────────────────────────
 
-/** Min 20, Max 60 chars (per assessment PDF) */
+/** Min 12, Max 60 chars */
 export const nameSchema = z
   .string({ required_error: 'Name is required' })
-  .min(20, 'Name must be at least 20 characters')
+  .min(12, 'Name must be at least 12 characters')
   .max(60, 'Name must be at most 60 characters');
 
 /** Max 400 chars */

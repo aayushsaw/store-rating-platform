@@ -80,7 +80,7 @@ describe('Auth Endpoints', () => {
       expect(res.body.message).toMatch(/already exists/i);
     });
 
-    it('returns 400 when name is too short (< 20 chars)', async () => {
+    it('returns 400 when name is too short (< 12 chars)', async () => {
       const res = await request(app)
         .post('/api/v1/auth/register')
         .send({ ...validUser, name: 'John' });

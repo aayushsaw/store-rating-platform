@@ -399,7 +399,7 @@ export function StoreManagement() {
                       <p className="field-error">{errors.owner.name.message}</p>
                     ) : (
                       <p className="mt-1 flex items-center gap-1 text-[10px] text-zinc-650">
-                        <Info className="h-3.5 w-3.5" /> Must be 20–60 characters.
+                        <Info className="h-3.5 w-3.5" /> Must be 12–60 characters.
                       </p>
                     )}
                   </div>

@@ -136,7 +136,7 @@ export function Register() {
                 ) : (
                   <p className="mt-1.5 flex items-center gap-1 text-[10px] text-zinc-650">
                     <Info className="h-3.5 w-3.5" />
-                    Minimum 20 characters required.
+                    Minimum 12 characters required.
                   </p>
                 )}
               </div>
