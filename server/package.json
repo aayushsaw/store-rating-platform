@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "build": "prisma generate && tsc -p tsconfig.json && tsc-alias -p tsconfig.json && node -e \"const fs = require('fs'); fs.mkdirSync('dist/docs', { recursive: true }); fs.copyFileSync('src/docs/openapi.yaml', 'dist/docs/openapi.yaml');\"",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
