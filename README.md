@@ -302,5 +302,5 @@ Test Files  6 passed (6)
 **Aayush Saw**
 
 - **GitHub**: [github.com/aayushsaw](https://github.com/aayushsaw)
-- **LinkedIn**: [linkedin.com/in/aayush-saw-0428261ba](https://www.linkedin.com/in/aayush-saw-0428261ba/)
-- **Email**: [aayushsaw@example.com](mailto:aayushsaw@example.com)
+- **LinkedIn**: [linkedin.com/in/aayush-saw](https://www.linkedin.com/in/aayush-saw-0428261ba/)
+- **Email**: [aayushsaw13@gmail.com](mailto:aayushsaw13@gmail.com)
