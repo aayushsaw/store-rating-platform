@@ -11,6 +11,12 @@
 
 A modern, high-performance, and secure store rating and discovery platform built with a monorepo architecture. RateStore features a handcrafted **Stripe/Linear-inspired dark UI** design system, secure JWT rotation, role-based access control, transaction rollback guards, and a robust integration test suite.
 
+### 🌐 Live Production Deployments
+
+- ⚡ **Frontend Web App**: [https://store-rating-platform-client-aayush-saws-projects.vercel.app](https://store-rating-platform-client-aayush-saws-projects.vercel.app)
+- ⚡ **API Gateway Service**: [https://store-rating-platform-88yg.onrender.com](https://store-rating-platform-88yg.onrender.com)
+- ⚡ **Interactive API Swagger Documentation**: [https://store-rating-platform-88yg.onrender.com/api-docs](https://store-rating-platform-88yg.onrender.com/api-docs)
+
 ---
 
 ## 📖 Project Overview
@@ -276,24 +282,29 @@ Test Files  6 passed (6)
 
 ## 🚢 Deployment Guidelines
 
-### Frontend Deployment (Vercel / Netlify)
+### Frontend Deployment (Vercel)
 
-1. Set the root workspace directory as `/client`.
-2. Configure **Build Command**: `npm run build`.
-3. Configure **Output Directory**: `dist`.
-4. Configure environment variable `VITE_API_URL` pointing to your deployed API server endpoint.
+1. **Root Directory**: Leave empty (default to repository root `/`).
+2. **Build Command**: `npm run build -w @store-rating/shared && npm run build -w client`
+3. **Output Directory**: `client/dist`
+4. **Environment Variables**:
+   - `VITE_API_URL`: Set to your Render API gateway URL (e.g. `https://store-rating-platform-88yg.onrender.com/api/v1`).
 
-### Backend Deployment (Render / Heroku / AWS)
+### Backend Deployment (Render)
 
-1. Set the root directory as `/server` or execute from monorepo root using workspace options.
-2. Build command: `npm run build -w server`.
-3. Set environment variable `DATABASE_URL` pointing to your production database.
-4. Execute `npx prisma migrate deploy` in post-build phases to apply migrations.
+1. **Root Directory**: Leave empty (default to repository root `/`).
+2. **Build Command**: `npm run build`
+3. **Start Command**: `npm run start -w server`
+4. **Environment Variables**:
+   - `NPM_CONFIG_PRODUCTION`: `false` (forces npm to install `devDependencies` for compile phases).
+   - `DATABASE_URL`: Set to your database connection string, ending with `?sslmode=require`.
+   - `CLIENT_ORIGIN`: Set to your live frontend Vercel URL.
+   - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`: Secure cryptographic string hashes.
 
-### Database Deployment (RDS / Neon)
+### Database Deployment (Neon PostgreSQL)
 
-1. Launch a PostgreSQL instance.
-2. Provide the production database connection string to your Express backend environment context.
+1. Initialize a PostgreSQL instance.
+2. Append `?sslmode=require` to your connection pooler URI and set it as `DATABASE_URL` on Render.
 
 ---
 
