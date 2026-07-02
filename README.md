@@ -17,6 +17,13 @@ A modern, high-performance, and secure store rating and discovery platform built
 - ⚡ **API Gateway Service**: [https://store-rating-platform-88yg.onrender.com](https://store-rating-platform-88yg.onrender.com)
 - ⚡ **Interactive API Swagger Documentation**: [https://store-rating-platform-88yg.onrender.com/api-docs](https://store-rating-platform-88yg.onrender.com/api-docs)
 
+🔑 **Demo Credentials (for Live Testing)**
+
+- **Common Password**: `Secure@123`
+- **System Admin Role**: `aayush.admin@example.com`
+- **Store Owner Role**: `rajesh.owner@example.com`
+- **Normal User / Customer Role**: `saanvi.customer@example.com`
+
 ---
 
 ## 📖 Project Overview
